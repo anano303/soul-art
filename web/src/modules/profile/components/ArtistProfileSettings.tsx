@@ -66,7 +66,6 @@ const artistFormSchema = z.object({
       instagram: socialFieldSchema,
       facebook: socialFieldSchema,
       behance: socialFieldSchema,
-      dribbble: socialFieldSchema,
       website: socialFieldSchema,
       tiktok: socialFieldSchema,
       youtube: socialFieldSchema,
@@ -96,7 +95,6 @@ const SOCIAL_KEYS = [
   "instagram",
   "facebook",
   "behance",
-  "dribbble",
   "website",
   "tiktok",
   "youtube",
@@ -132,13 +130,6 @@ const SOCIAL_FIELD_META: Array<{
     labelGe: "Behance",
     placeholderEn: "behance.net/username",
     placeholderGe: "behance.net/username",
-  },
-  {
-    key: "dribbble",
-    labelEn: "Dribbble",
-    labelGe: "Dribbble",
-    placeholderEn: "dribbble.com/username",
-    placeholderGe: "dribbble.com/username",
   },
   {
     key: "website",
@@ -374,7 +365,8 @@ export function ArtistProfileSettings({
   const [lastSavedSlug, setLastSavedSlug] = useState<string | null>(
     baselineValues.slug || null
   );
-  const [copyState, setCopyState] = useState<"idle" | "copied">("idle");
+  // Only written to (the copy-link UI lives on the public page).
+  const [, setCopyState] = useState<"idle" | "copied">("idle");
   const [galleryDraft, setGalleryDraft] = useState<string[]>(
     baselineValues.gallery
   );

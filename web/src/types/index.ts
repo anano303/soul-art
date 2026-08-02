@@ -4,7 +4,6 @@ export interface ArtistSocialLinks {
   instagram?: string;
   facebook?: string;
   behance?: string;
-  dribbble?: string;
   website?: string;
   tiktok?: string;
   youtube?: string;

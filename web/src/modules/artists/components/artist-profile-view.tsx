@@ -78,7 +78,6 @@ const socialOrder: Array<{
   { key: "instagram", label: "Instagram" },
   { key: "facebook", label: "Facebook" },
   { key: "behance", label: "Behance" },
-  { key: "dribbble", label: "Dribbble" },
   { key: "website", label: "Website" },
   { key: "tiktok", label: "TikTok" },
   { key: "youtube", label: "YouTube" },

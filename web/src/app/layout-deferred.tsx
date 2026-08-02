@@ -67,6 +67,13 @@ const CampaignConsentPrompt = dynamic(
     ),
   { ssr: false },
 );
+const SellerOnboardingPrompt = dynamic(
+  () =>
+    import("@/components/seller-onboarding/seller-onboarding-prompt").then(
+      (m) => ({ default: m.SellerOnboardingPrompt }),
+    ),
+  { ssr: false },
+);
 const ReferralCodeInput = dynamic(
   () =>
     import("@/components/referral-code-input/referral-code-input").then(
@@ -186,6 +193,9 @@ export function LayoutDeferredComponents() {
 
       {/* Campaign Consent Prompt for Sellers */}
       <CampaignConsentPrompt />
+
+      {/* Asks sellers for the profile info added after they registered */}
+      <SellerOnboardingPrompt />
 
       {/* Call Request Popup - დროებით გათიშულია */}
       {/* <CallRequestPopup /> */}

@@ -579,7 +579,10 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    if (user.role !== Role.Seller) {
+    if (
+      user.role !== Role.Seller &&
+      user.role !== Role.SellerAndSalesManager
+    ) {
       throw new BadRequestException('Only sellers can update artist profile');
     }
 
@@ -652,7 +655,12 @@ export class UsersService {
     }
 
     if (dto.artistSocials !== undefined) {
-      update.artistSocials = this.sanitizeSocialLinks(dto.artistSocials);
+      // Merge over what is stored: a caller that sends only two networks must
+      // not wipe the rest. Sending a key with an empty string clears it.
+      update.artistSocials = {
+        ...(user.artistSocials || {}),
+        ...(this.sanitizeSocialLinks(dto.artistSocials) || {}),
+      };
     }
 
     if (dto.artistHighlights !== undefined) {

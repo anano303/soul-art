@@ -33,11 +33,6 @@ export class ArtistSocialLinksDto {
   @IsOptional()
   @IsString()
   @MaxLength(255)
-  dribbble?: string;
-
-  @IsOptional()
-  @IsString()
-  @MaxLength(255)
   website?: string;
 
   @IsOptional()

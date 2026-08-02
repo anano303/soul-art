@@ -17,7 +17,6 @@ export const SOCIAL_FIELDS = [
   { key: "youtube", label: "YouTube", placeholder: "youtube.com/@channel" },
   { key: "pinterest", label: "Pinterest", placeholder: "pinterest.com/user" },
   { key: "behance", label: "Behance", placeholder: "behance.net/username" },
-  { key: "dribbble", label: "Dribbble", placeholder: "dribbble.com/username" },
   { key: "website", label: "Website", placeholder: "example.com" },
 ] as const;
 

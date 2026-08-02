@@ -1,0 +1,150 @@
+.sob-overlay {
+  position: fixed;
+  inset: 0;
+  /* Above the header (10000) and its dropdowns (10030). */
+  z-index: 100000;
+  background: rgba(1, 24, 45, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.sob-modal {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.75rem 1.5rem 1.5rem;
+  box-shadow: 0 24px 60px rgba(1, 24, 45, 0.3);
+}
+
+.sob-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 0;
+}
+
+.sob-close:hover {
+  color: #012645;
+}
+
+.sob-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #012645;
+}
+
+.sob-subtitle {
+  margin: 0 0 1.25rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.sob-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.sob-field > label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #012645;
+}
+
+.sob-hint {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: -0.2rem;
+}
+
+.sob-field input,
+.sob-field select {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: #fff;
+  outline: none;
+}
+
+.sob-field input:focus,
+.sob-field select:focus {
+  border-color: #012645;
+}
+
+.sob-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #012645;
+  margin-bottom: 1.15rem;
+}
+
+.sob-checkbox input {
+  width: auto;
+  cursor: pointer;
+}
+
+.sob-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.sob-later {
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 0.6rem 0.5rem;
+}
+
+.sob-later:hover {
+  color: #012645;
+}
+
+.sob-save {
+  padding: 0.65rem 1.75rem;
+  border: none;
+  border-radius: 100px;
+  background: linear-gradient(135deg, #012645, #02457a);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sob-save:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+@media (max-width: 420px) {
+  .sob-modal {
+    padding: 1.5rem 1.1rem 1.1rem;
+  }
+
+  .sob-title {
+    font-size: 1.05rem;
+  }
+}
