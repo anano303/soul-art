@@ -10,9 +10,14 @@ export interface ArtistVideo {
   videoUrl?: string;
   embedUrl?: string;
   title?: string;
-  status: 'processing' | 'ready' | 'failed';
+  /** queued → waiting for the daily YouTube budget, then processing → ready. */
+  status: 'queued' | 'processing' | 'ready' | 'failed';
   error?: string;
+  /** File parked on disk until its turn comes. */
+  pendingFile?: string;
   uploadedAt?: Date;
+  /** When it actually landed on YouTube — used to count the daily budget. */
+  publishedAt?: Date;
 }
 
 export interface ArtistSocialLinks {
@@ -257,11 +262,13 @@ export class User {
         title: { type: String },
         status: {
           type: String,
-          enum: ['processing', 'ready', 'failed'],
-          default: 'processing',
+          enum: ['queued', 'processing', 'ready', 'failed'],
+          default: 'queued',
         },
         error: { type: String },
+        pendingFile: { type: String },
         uploadedAt: { type: Date, default: Date.now },
+        publishedAt: { type: Date },
       },
     ],
     default: [],

@@ -1897,6 +1897,30 @@ export function CreateProductForm({
                     ✕
                   </button>
                 </div>
+              ) : existingYoutubeVideoUrl ? (
+                /* Editing a product that already has a video on YouTube. */
+                <div className="video-uploaded-input">
+                  <a
+                    href={existingYoutubeVideoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="uploaded-text existing-video-link"
+                  >
+                    ▶ {language === "en" ? "Video on YouTube" : "ვიდეო YouTube-ზე"}
+                  </a>
+                  <button
+                    type="button"
+                    className="remove-video-btn"
+                    title={
+                      language === "en"
+                        ? "Detach the video"
+                        : "ვიდეოს მოხსნა"
+                    }
+                    onClick={() => setExistingYoutubeVideoUrl(null)}
+                  >
+                    ✕
+                  </button>
+                </div>
               ) : (
                 <input
                   id="productVideo"

@@ -123,6 +123,7 @@ interface WorkerData {
   userEmail: string;
   userId: string;
   images: string[];
+  artistSlug?: string;
   videoFilePath?: string;
   // Metadata prepared by the service once the product is saved.
   title?: string;
@@ -378,6 +379,9 @@ async function processVideo() {
       'https://soulart.ge'
     ).replace(/\/+$/, '');
     georgianDescription += `\n🛒 შესყიდვის ბმული: ${siteBase}/products/${data.productId}\n`;
+    if (data.artistSlug) {
+      georgianDescription += `🖼️ ავტორის გვერდი: ${siteBase}/@${data.artistSlug}\n`;
+    }
     georgianDescription += `\n✨ SoulArt - ქართული ხელოვნების პლატფორმა`;
 
     // Build tags with product name, category, brand

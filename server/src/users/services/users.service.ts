@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
-import { User, UserDocument } from '../schemas/user.schema';
+import { ArtistVideo, User, UserDocument } from '../schemas/user.schema';
 import { Product, ProductStatus } from '../../products/schemas/product.schema';
 import {
   PortfolioPost,
@@ -38,6 +38,7 @@ import { UserCloudinaryService } from './user-cloudinary.service';
 import { CloudinaryService } from '@/cloudinary/services/cloudinary.service';
 import { StorageService } from '@/storage/storage.service';
 import { YoutubeService } from '@/youtube/youtube.service';
+import * as fs from 'fs';
 import { promises as fsp } from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -489,6 +490,9 @@ export class UsersService {
 
   private static readonly MAX_ARTIST_VIDEOS = 5;
 
+  /** Guards the queue drain against overlapping runs. */
+  private artistQueueRunning = false;
+
   /**
    * "About me" videos go straight to YouTube — they never touch our storage.
    * The upload runs in the background so the artist is not stuck waiting; the
@@ -527,26 +531,27 @@ export class UsersService {
     const title = this.buildArtistVideoTitle(user);
     const entryId = new Types.ObjectId();
 
+    // The file waits on disk: YouTube only lets us upload a handful per day,
+    // so the clip may have to sit in the queue until tomorrow.
+    const pendingFile = await this.stagePendingArtistVideo(
+      file.buffer,
+      file.originalname,
+    );
+
     await this.userModel.findByIdAndUpdate(userId, {
       $push: {
         artistVideos: {
           _id: entryId,
           title,
-          status: 'processing',
+          status: 'queued',
+          pendingFile,
           uploadedAt: new Date(),
         },
       },
     });
 
-    // Fire and forget — the response goes out now.
-    void this.processArtistVideoUpload(
-      userId,
-      entryId.toString(),
-      file.buffer,
-      file.originalname,
-      title,
-      this.buildArtistVideoDescription(user),
-    );
+    // Try right away; if today's budget is gone the cron picks it up.
+    void this.drainArtistVideoQueue();
 
     const refreshed = await this.userModel
       .findById(userId)
@@ -554,6 +559,147 @@ export class UsersService {
       .lean();
 
     return { videos: refreshed?.artistVideos || [] };
+  }
+
+  private get pendingArtistVideoDir(): string {
+    return path.join(process.cwd(), 'uploads', 'pending-artist-videos');
+  }
+
+  private async stagePendingArtistVideo(
+    buffer: Buffer,
+    originalName: string,
+  ): Promise<string> {
+    await fsp.mkdir(this.pendingArtistVideoDir, { recursive: true });
+    const rawExt = path.extname(originalName || '').toLowerCase();
+    const extension = /^\.[a-z0-9]{2,5}$/.test(rawExt) ? rawExt : '.mp4';
+    const token = `${Date.now()}-${Math.round(Math.random() * 1e9)}${extension}`;
+    await fsp.writeFile(path.join(this.pendingArtistVideoDir, token), buffer);
+    return token;
+  }
+
+  /** YouTube quota resets at midnight Pacific Time. */
+  private startOfYoutubeQuotaDay(): Date {
+    const now = new Date();
+    const pacific = new Date(
+      now.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }),
+    );
+    const diffMs = now.getTime() - pacific.getTime();
+    pacific.setHours(0, 0, 0, 0);
+    return new Date(pacific.getTime() + diffMs);
+  }
+
+  private get dailyArtistVideoLimit(): number {
+    const raw = Number(process.env.YOUTUBE_ARTIST_DAILY_UPLOADS);
+    return Number.isFinite(raw) && raw > 0 ? Math.floor(raw) : 4;
+  }
+
+  /**
+   * Uploads queued clips while today's budget lasts. Runs on every upload and
+   * on a schedule, so leftovers go out the next day without anyone acting.
+   */
+  @Cron(CronExpression.EVERY_30_MINUTES)
+  async drainArtistVideoQueue(): Promise<void> {
+    if (this.artistQueueRunning) return;
+    this.artistQueueRunning = true;
+
+    try {
+      const since = this.startOfYoutubeQuotaDay();
+      const usedToday = await this.userModel.countDocuments({
+        'artistVideos.publishedAt': { $gte: since },
+      });
+
+      let budget = this.dailyArtistVideoLimit - usedToday;
+      if (budget <= 0) return;
+
+      const owners = await this.userModel
+        .find({ 'artistVideos.status': 'queued' })
+        .select('_id artistVideos storeName name artistBio artistSlug artistLocation artistDisciplines artistOpenForCommissions')
+        .sort({ 'artistVideos.uploadedAt': 1 })
+        .limit(budget)
+        .exec();
+
+      for (const owner of owners) {
+        if (budget <= 0) break;
+
+        const entry = (owner.artistVideos || []).find(
+          (video) => video.status === 'queued' && video.pendingFile,
+        );
+        if (!entry) continue;
+
+        budget -= 1;
+        await this.publishArtistVideo(owner, entry);
+      }
+    } catch (error) {
+      this.logger.error(
+        `Artist video queue failed: ${
+          error instanceof Error ? error.message : error
+        }`,
+      );
+    } finally {
+      this.artistQueueRunning = false;
+    }
+  }
+
+  private async publishArtistVideo(
+    owner: UserDocument,
+    entry: ArtistVideo,
+  ): Promise<void> {
+    const entryId = String((entry as { _id?: unknown })._id);
+    const filePath = path.join(
+      this.pendingArtistVideoDir,
+      path.basename(entry.pendingFile || ''),
+    );
+
+    await this.userModel.updateOne(
+      { _id: owner._id, 'artistVideos._id': entryId },
+      { $set: { 'artistVideos.$.status': 'processing' } },
+    );
+
+    try {
+      if (!fs.existsSync(filePath)) {
+        throw new Error('ატვირთვის ფაილი ვეღარ მოიძებნა');
+      }
+
+      const result = await this.youtubeService.uploadVideo(filePath, {
+        title: entry.title || this.buildArtistVideoTitle(owner),
+        description: this.buildArtistVideoDescription(owner),
+        tags: ['SoulArt', 'ქართული_ხელოვნება', 'Georgian_Art'],
+        privacyStatus: 'public',
+      });
+
+      await this.userModel.updateOne(
+        { _id: owner._id, 'artistVideos._id': entryId },
+        {
+          $set: {
+            'artistVideos.$.videoId': result.videoId,
+            'artistVideos.$.videoUrl': `https://www.youtube.com/watch?v=${result.videoId}`,
+            'artistVideos.$.embedUrl': `https://www.youtube.com/embed/${result.videoId}`,
+            'artistVideos.$.status': 'ready',
+            'artistVideos.$.publishedAt': new Date(),
+          },
+          $unset: { 'artistVideos.$.pendingFile': '' },
+        },
+      );
+      await fsp.unlink(filePath).catch(() => undefined);
+      this.logger.log(`Artist video published: ${result.videoId}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      const quotaHit = /quota/i.test(message);
+
+      await this.userModel.updateOne(
+        { _id: owner._id, 'artistVideos._id': entryId },
+        {
+          $set: {
+            // A quota error is not the artist's fault — keep it in the queue.
+            'artistVideos.$.status': quotaHit ? 'queued' : 'failed',
+            'artistVideos.$.error': message.slice(0, 300),
+          },
+        },
+      );
+      this.logger.error(
+        `Artist video ${entryId} ${quotaHit ? 'requeued' : 'failed'}: ${message}`,
+      );
+    }
   }
 
   private buildArtistVideoTitle(user: UserDocument): string {
@@ -595,62 +741,6 @@ export class UsersService {
     lines.push('', '✨ SoulArt — ქართული ხელოვნების პლატფორმა');
 
     return lines.join('\n');
-  }
-
-  private async processArtistVideoUpload(
-    userId: string,
-    entryId: string,
-    buffer: Buffer,
-    originalName: string,
-    title: string,
-    description: string,
-  ): Promise<void> {
-    let tempDir: string | null = null;
-
-    try {
-      tempDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'soulart-artist-'));
-      const extension = path.extname(originalName || '') || '.mp4';
-      const filePath = path.join(tempDir, `intro${extension}`);
-      await fsp.writeFile(filePath, buffer);
-
-      const result = await this.youtubeService.uploadVideo(filePath, {
-        title,
-        description,
-        tags: ['SoulArt', 'ქართული_ხელოვნება', 'Georgian_Art'],
-        privacyStatus: 'public',
-      });
-
-      await this.userModel.updateOne(
-        { _id: userId, 'artistVideos._id': entryId },
-        {
-          $set: {
-            'artistVideos.$.videoId': result.videoId,
-            'artistVideos.$.videoUrl': `https://www.youtube.com/watch?v=${result.videoId}`,
-            'artistVideos.$.embedUrl': `https://www.youtube.com/embed/${result.videoId}`,
-            'artistVideos.$.status': 'ready',
-          },
-        },
-      );
-      this.logger.log(`Artist video uploaded to YouTube: ${result.videoId}`);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Artist video upload failed: ${message}`);
-      await this.userModel.updateOne(
-        { _id: userId, 'artistVideos._id': entryId },
-        {
-          $set: {
-            'artistVideos.$.status': 'failed',
-            'artistVideos.$.error': message.slice(0, 300),
-          },
-        },
-      );
-    } finally {
-      if (tempDir) {
-        await fsp.rm(tempDir, { recursive: true, force: true }).catch(() => {
-          /* best effort */
-        });
-      }
-    }
   }
 
   /** Removes the entry and the video from YouTube itself. */

@@ -127,3 +127,10 @@
   opacity: 0.6;
   cursor: wait;
 }
+
+.avp__status--queued {
+  background: #fff8e6;
+  color: #856404;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}

@@ -1467,3 +1467,14 @@
     align-items: flex-start;
   }
 }
+
+/* Existing YouTube video shown when editing a product */
+.video-uploaded-input .existing-video-link {
+  color: #012645;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.video-uploaded-input .existing-video-link:hover {
+  text-decoration: underline;
+}

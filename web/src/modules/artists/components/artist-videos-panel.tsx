@@ -74,8 +74,8 @@ export function ArtistVideosPanel({
       toast({
         title: en ? "Video received" : "ვიდეო მიღებულია",
         description: en
-          ? "It is uploading to YouTube — refresh in a couple of minutes."
-          : "მიმდინარეობს YouTube-ზე ატვირთვა — რამდენიმე წუთში განაახლე გვერდი.",
+          ? "It goes  automatically — if the daily limit is reached it waits in the queue until tomorrow."
+          : "ავტომატურად აიტვირთება — თუ დღიური ლიმიტი ამოწურულია, რიგში დაელოდება ხვალამდე.",
       });
     } catch (err) {
       setError(
@@ -194,9 +194,13 @@ export function ArtistVideosPanel({
                     ? en
                       ? "Upload failed"
                       : "ატვირთვა ჩაიშალა"
+                    : video.status === "queued"
+                    ? en
+                      ? "In queue — YouTube allows a few uploads per day, yours goes out automatically (today or tomorrow)."
+                      : "რიგშია —  ელოდება დადასტურებას / ავტომატურად აიტვირთება (დღეს ან ხვალ)."
                     : en
-                    ? "Uploading to YouTube…"
-                    : "იტვირთება YouTube-ზე…"}
+                    ? "Uploading"
+                    : "იტვირთება"}
                 </div>
               )}
               {isOwner && (

@@ -135,6 +135,7 @@ export class ProductYoutubeService {
       images: Array.isArray(product.images)
         ? product.images.map((img) => String(img)).filter(Boolean)
         : [],
+      artistSlug: user.artistSlug ? String(user.artistSlug) : undefined,
       videoFilePath,
       // Pre-built metadata wins over whatever the worker would compose.
       title: metadata.title,
@@ -668,10 +669,23 @@ export class ProductYoutubeService {
       lines.push(`🏷️ ფასდაკლება: ${productData.discountPercentage}%`);
     }
 
+    const baseUrl = this.resolveClientBaseUrl().replace(/\/+$/, '');
+    const artistName = user.storeName || user.name || 'SoulArt';
+
     lines.push('');
-    lines.push(`👤 გამყიდველი: ${user.name || 'SoulArt'}`);
+    lines.push(`👤 ხელოვანი: ${artistName}`);
+
     lines.push('');
-    lines.push('🛒 შეიძინეთ: https://soulart.ge');
+    if (productData._id) {
+      lines.push(`🛒 შესაძენად: ${baseUrl}/products/${productData._id}`);
+    }
+    // The artist's own page — their store front with every work they sell.
+    if (user.artistSlug) {
+      lines.push(`🖼️ ${artistName}-ის გვერდი: ${baseUrl}/@${user.artistSlug}`);
+    } else {
+      lines.push(`🛒 შეიძინეთ: ${baseUrl}`);
+    }
+
     lines.push('');
     lines.push('#SoulArt #ხელოვნება #საქართველო #art #georgia');
 

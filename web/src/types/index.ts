@@ -17,7 +17,7 @@ export interface ArtistVideo {
   videoUrl?: string;
   embedUrl?: string;
   title?: string;
-  status: "processing" | "ready" | "failed";
+  status: "queued" | "processing" | "ready" | "failed";
   error?: string;
   uploadedAt?: string;
 }
