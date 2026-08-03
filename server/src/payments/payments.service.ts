@@ -7,7 +7,10 @@ import { AuctionService } from '../auctions/services/auction.service';
 import { EmailService } from '../email/services/email.services';
 import { PromotionService } from '../promotions/promotion.service';
 import { CommissionsService } from '../commissions/services/commissions.service';
-import { EtsyListingService } from '../etsy/etsy-listing.service';
+import {
+  BOG_CHECKOUT_TTL_MINUTES,
+  EtsyListingService,
+} from '../etsy/etsy-listing.service';
 
 interface BogTokenResponse {
   access_token: string;
@@ -866,7 +869,9 @@ export class PaymentsService {
         'bog_loyalty',
         'bog_p2p',
       ],
-      ttl: 10,
+      // Must stay in step with the Etsy service's pending-payment lock, or the
+      // seller waits out a countdown for a checkout BOG already closed
+      ttl: BOG_CHECKOUT_TTL_MINUTES,
       redirect_urls: {
         success: `${origin}/admin/etsy/publish?id=${data.productId}&etsy=success`,
         fail: `${origin}/admin/etsy/publish?id=${data.productId}&etsy=fail`,
@@ -902,6 +907,7 @@ export class PaymentsService {
     await this.etsyListingService.attachBogOrderId(
       externalOrderId,
       response.data.id,
+      response.data._links?.redirect?.href,
     );
 
     this.logger.log(

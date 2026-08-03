@@ -67,6 +67,7 @@ interface EtsyPreview {
     expiresAt: string;
     secondsLeft: number | null;
     error: string | null;
+    redirectUrl: string | null;
   } | null;
 }
 
@@ -164,6 +165,7 @@ function EtsyPublishContent() {
     state: string;
   } | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [syncing, setSyncing] = useState(false);
 
   const loadData = useCallback(async () => {
     if (!productId) return;
@@ -292,6 +294,60 @@ function EtsyPublishContent() {
     }
   };
 
+  // Asks the backend to check the open checkout against BOG. Either sends the
+  // seller back to the same BOG page, publishes an already-paid fee, or clears
+  // a dead checkout so a new payment can start right away.
+  const handleSyncPayment = async () => {
+    if (!productId) return;
+    setSyncing(true);
+    try {
+      const res = await fetchWithAuth(
+        `/etsy/products/${productId}/fee-payment/sync`,
+        { method: "POST" }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.message || "Status check failed");
+
+      if (data.state === "resumable" && data.redirectUrl) {
+        window.location.href = data.redirectUrl;
+        return;
+      }
+      if (data.state === "published") {
+        toast({
+          title: isKa ? "გამოქვეყნდა Etsy-ზე! 🎉" : "Published to Etsy! 🎉",
+          description: isKa
+            ? "გადახდა დადასტურდა და ნამუშევარი განთავსდა"
+            : "Payment confirmed and the artwork was published",
+        });
+      } else if (data.state === "expired") {
+        toast({
+          title: isKa ? "სესია დაიხურა" : "Checkout closed",
+          description: isKa
+            ? "ახლა შეგიძლიათ ახალი გადახდის დაწყება"
+            : "You can start a new payment now",
+        });
+      } else if (data.state === "unknown") {
+        toast({
+          variant: "destructive",
+          title: isKa ? "ბანკთან კავშირი ვერ დამყარდა" : "Bank unreachable",
+          description: isKa
+            ? "სცადეთ ხელახლა რამდენიმე წამში"
+            : "Please try again in a moment",
+        });
+      }
+      await loadData();
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: isKa ? "შეცდომა" : "Error",
+        description:
+          err instanceof Error ? err.message : "Status check failed",
+      });
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   const handleCardPay = async () => {
     if (!productId) return;
     setPublishing(true);
@@ -301,6 +357,11 @@ function EtsyPublishContent() {
         body: JSON.stringify({ productId }),
       });
       const data = await res.json();
+      // A checkout was already open — reuse it rather than dead-ending
+      if (res.status === 409 && data?.redirectUrl) {
+        window.location.href = data.redirectUrl;
+        return;
+      }
       if (!res.ok || !data.redirectUrl) {
         throw new Error(data?.message || "Payment initialization failed");
       }
@@ -694,22 +755,48 @@ function EtsyPublishContent() {
                   </div>
                 )}
 
-                {/* Pending checkout — previous payment session still open */}
+                {/* Pending checkout — the seller can go straight back to the
+                    same BOG page instead of waiting for the lock to lapse */}
                 {pendingCheckout && (
                   <div className="etsy-checkout-countdown">
                     <p>
                       ⏳{" "}
                       {isKa
-                        ? "ამ ნამუშევრისთვის გადახდის სესია უკვე გახსნილია. თუ გადახდას არ დაასრულებთ, სესია გაუქმდება და ხელახლა ცდას შეძლებთ:"
-                        : "A payment session for this artwork is already open. If you don't complete it, the session will be cancelled and you can retry in:"}
+                        ? "ამ ნამუშევრისთვის გადახდა დაწყებულია. გააგრძელეთ იმავე გვერდზე — დრო, სანამ სესია ავტომატურად გაუქმდება:"
+                        : "A payment for this artwork is already started. Continue on the same page — time left before the session is cancelled:"}
                     </p>
                     <div className="etsy-countdown-timer">
                       {formatCountdown(countdown ?? 0)}
                     </div>
-                    <button onClick={loadData} disabled={loading}>
-                      <RefreshCw size={14} />
-                      {isKa ? "სტატუსის განახლება" : "Refresh status"}
-                    </button>
+                    <div className="etsy-countdown-actions">
+                      {pendingCheckout.redirectUrl && (
+                        <button
+                          className="etsy-countdown-primary"
+                          onClick={() => {
+                            window.location.href = pendingCheckout.redirectUrl!;
+                          }}
+                        >
+                          <CreditCard size={15} />
+                          {isKa ? "გადახდის გაგრძელება" : "Continue payment"}
+                        </button>
+                      )}
+                      <button
+                        className="etsy-countdown-secondary"
+                        onClick={handleSyncPayment}
+                        disabled={syncing}
+                      >
+                        <RefreshCw
+                          size={14}
+                          className={syncing ? "etsy-spin" : ""}
+                        />
+                        {isKa ? "სტატუსის შემოწმება" : "Check status"}
+                      </button>
+                    </div>
+                    <p className="etsy-countdown-hint">
+                      {isKa
+                        ? "თუ ბანკმა გადახდა უარყო, დააჭირეთ „სტატუსის შემოწმებას“ — ტაიმერის დალოდება საჭირო არ არის."
+                        : "If the bank declined the payment, press “Check status” — no need to wait for the timer."}
+                    </p>
                   </div>
                 )}
 

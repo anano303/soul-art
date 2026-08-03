@@ -589,6 +589,32 @@
   cursor: pointer;
 }
 
+.etsy-countdown-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Resuming the existing checkout is the main action; checking status is the
+   escape hatch when the bank already declined */
+.etsy-checkout-countdown button.etsy-countdown-secondary {
+  background: transparent;
+  color: #7a5c00;
+  border: 1px solid #d9a827;
+}
+
+.etsy-checkout-countdown button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.etsy-countdown-hint {
+  margin: 10px 0 0;
+  font-size: 12px;
+  opacity: 0.85;
+}
+
 .etsy-spin {
   animation: etsyPageSpin 1s linear infinite;
 }

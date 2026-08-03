@@ -71,9 +71,17 @@ const DEFAULT_TAGS = [
 ];
 const FALLBACK_TAXONOMY_KEYWORD = 'Painting';
 const TAXONOMY_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
-// BOG checkout ttl is 10 min — a pending payment older than this cannot
-// complete anymore, so it's marked expired and the seller may retry
-const PENDING_PAYMENT_TTL_MS = 15 * 60 * 1000;
+// Lifespan we ask BOG for on the hosted checkout (`ttl`, in minutes — BOG
+// allows 2..1440, defaults to 15). Exported so the payments service sends
+// exactly this and our lock can never outlive BOG's checkout: when the two
+// disagreed, the seller sat through a countdown for a page BOG had already
+// killed and could neither resume nor start over.
+export const BOG_CHECKOUT_TTL_MINUTES = 15;
+// Small grace period on top, to absorb clock skew between us and BOG and to
+// let a late callback for a just-expired order still land as 'paid'
+const PENDING_PAYMENT_GRACE_MS = 60 * 1000;
+const PENDING_PAYMENT_TTL_MS =
+  BOG_CHECKOUT_TTL_MINUTES * 60 * 1000 + PENDING_PAYMENT_GRACE_MS;
 // Stop uploading further images before serverless/callback timeouts hit
 const IMAGE_UPLOAD_BUDGET_MS = 40 * 1000;
 
@@ -133,6 +141,9 @@ export interface EtsyListingPreview {
     expiresAt: string;
     secondsLeft: number | null;
     error: string | null;
+    // BOG's hosted checkout, while it is still live — lets the seller return
+    // to the same page after closing the tab or idling too long
+    redirectUrl: string | null;
   } | null;
 }
 
@@ -323,9 +334,13 @@ export class EtsyListingService {
       .exec();
     let pendingPayment: EtsyListingPreview['pendingPayment'] = null;
     if (livePayment) {
-      const expiresAtMs =
-        new Date((livePayment as any).createdAt).getTime() +
-        PENDING_PAYMENT_TTL_MS;
+      // Prefer the stored expiry (mirrors BOG's ttl); fall back to createdAt
+      // for records written before expiresAt was persisted
+      const expiresAtMs = livePayment.expiresAt
+        ? new Date(livePayment.expiresAt).getTime()
+        : new Date((livePayment as any).createdAt).getTime() +
+          PENDING_PAYMENT_TTL_MS;
+      const stillLive = expiresAtMs > Date.now();
       pendingPayment = {
         id: String(livePayment._id),
         status: livePayment.status,
@@ -335,6 +350,11 @@ export class EtsyListingService {
             ? Math.max(0, Math.ceil((expiresAtMs - Date.now()) / 1000))
             : null,
         error: livePayment.error ?? null,
+        // Only offer resuming while BOG would still accept the payment
+        redirectUrl:
+          livePayment.status === 'pending' && stillLive
+            ? (livePayment.redirectUrl ?? null)
+            : null,
       };
     }
 
@@ -1077,13 +1097,36 @@ export class EtsyListingService {
         product: productId,
         status: { $in: ['pending', 'paid', 'publish_failed'] },
       })
-      .lean()
+      .sort({ createdAt: -1 })
       .exec();
-    if (existing) {
+
+    if (existing && existing.status === 'pending') {
+      // Don't take our own record's word for it — a seller who lost the BOG
+      // tab or had the card declined would otherwise be stuck behind a
+      // countdown. Ask BOG, and only block while the checkout is really live.
+      const outcome = await this.reconcilePendingCheckout(existing);
+      if (outcome === 'resumable' || outcome === 'unknown') {
+        throw new HttpException(
+          {
+            message:
+              'A checkout for this product is already open — continue that payment instead of starting a new one',
+            code: 'CHECKOUT_ALREADY_OPEN',
+            // Let the seller return to the same BOG page
+            redirectUrl: existing.redirectUrl ?? null,
+          },
+          HttpStatus.CONFLICT,
+        );
+      }
+      // 'paid' falls through to the guard below; 'dead' releases the lock
+      if (outcome === 'paid') {
+        throw new HttpException(
+          'This listing fee is already paid — publishing will be retried, no need to pay again',
+          HttpStatus.CONFLICT,
+        );
+      }
+    } else if (existing) {
       throw new HttpException(
-        existing.status === 'pending'
-          ? 'A payment for this product is already in progress'
-          : 'The listing fee is already paid for this product — no need to pay again, publishing will be retried',
+        'The listing fee is already paid for this product — no need to pay again, publishing will be retried',
         HttpStatus.CONFLICT,
       );
     }
@@ -1094,6 +1137,167 @@ export class EtsyListingService {
       feeGel: preview.pricing.listingFeeGel,
       productName: product.name,
       sellerId,
+    };
+  }
+
+  /**
+   * Asks BOG what actually happened to a still-'pending' checkout and moves
+   * our record to a terminal state when BOG has one. Without this, a seller
+   * who abandoned or failed a checkout was locked out until our own timer
+   * lapsed, even though BOG had already rejected the order.
+   *
+   * BOG order_status.key values (payments/v1/receipt/:id):
+   *   created | processing            → checkout still live, resumable
+   *   completed                       → paid; publish it
+   *   rejected                        → terminal (reject_reason 'expiration'
+   *                                     when the order simply timed out)
+   *   refunded* | auth_requested |
+   *   blocked | partial_completed     → not applicable to this flow
+   *
+   * Returns the outcome so callers can decide whether to resume or reissue.
+   * Never throws on BOG/network failure — an unreachable BOG must not stop a
+   * seller from publishing, so we fall back to 'unknown' and leave the record
+   * alone (the lock still expires on its own).
+   */
+  private async reconcilePendingCheckout(
+    payment: EtsyFeePaymentDocument,
+  ): Promise<'paid' | 'resumable' | 'dead' | 'unknown'> {
+    if (payment.status !== 'pending') {
+      return payment.status === 'paid' ? 'paid' : 'dead';
+    }
+
+    const expired = payment.expiresAt
+      ? payment.expiresAt.getTime() <= Date.now()
+      : new Date((payment as any).createdAt).getTime() +
+          PENDING_PAYMENT_TTL_MS <=
+        Date.now();
+
+    // Legacy records predate bogOrderId — unverifiable, so fall back to time
+    if (!payment.bogOrderId) {
+      if (expired) {
+        payment.status = 'expired';
+        await payment.save();
+        return 'dead';
+      }
+      return 'resumable';
+    }
+
+    let statusKey: string | undefined;
+    let rejectReason: string | undefined;
+    try {
+      const receipt = await this.paymentsService.getPaymentStatus(
+        payment.bogOrderId,
+      );
+      statusKey = receipt?.order_status?.key?.toLowerCase();
+      rejectReason =
+        typeof receipt?.reject_reason === 'string'
+          ? receipt.reject_reason
+          : receipt?.reject_reason?.key;
+    } catch (error: any) {
+      this.logger.warn(
+        `BOG status check failed for ${payment.externalOrderId}: ${error.message}`,
+      );
+      // Can't confirm anything — only time may retire the record
+      if (expired) {
+        payment.status = 'expired';
+        await payment.save();
+        return 'dead';
+      }
+      return 'unknown';
+    }
+
+    if (statusKey === 'completed') {
+      payment.status = 'paid';
+      await payment.save();
+      this.logger.log(
+        `Etsy fee payment ${payment.externalOrderId} found paid via BOG status check`,
+      );
+      return 'paid';
+    }
+
+    if (statusKey === 'rejected') {
+      // Terminal: release the lock now rather than making the seller wait out
+      // a countdown for a checkout BOG has already closed
+      payment.status = 'expired';
+      payment.error = `BOG rejected the payment${
+        rejectReason ? ` (${rejectReason})` : ''
+      }`;
+      await payment.save();
+      return 'dead';
+    }
+
+    // 'created' / 'processing' — the hosted checkout is still usable
+    if (expired) {
+      payment.status = 'expired';
+      await payment.save();
+      return 'dead';
+    }
+    return 'resumable';
+  }
+
+  /**
+   * Resolves the live checkout for a product: reconciles with BOG, publishes
+   * if it turns out to be paid, and reports whether the seller can be sent
+   * back to the same BOG page. Backs the "Refresh status" / "Continue
+   * payment" controls on the publish screen.
+   */
+  async syncCardFeePayment(
+    productId: string,
+    requester: { _id: any; role: string },
+  ): Promise<{
+    state: 'none' | 'resumable' | 'paid' | 'published' | 'expired' | 'unknown';
+    redirectUrl?: string | null;
+    secondsLeft?: number | null;
+    message: string;
+  }> {
+    const payment = await this.etsyFeePaymentModel
+      .findOne({ product: productId, status: { $in: ['pending', 'paid'] } })
+      .sort({ createdAt: -1 })
+      .exec();
+
+    if (!payment) {
+      return { state: 'none', message: 'No open payment for this product' };
+    }
+    const isOwner = String(payment.seller) === String(requester._id);
+    if (!isOwner && requester.role !== 'admin') {
+      throw new HttpException(
+        'You can only check your own payments',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    const outcome = await this.reconcilePendingCheckout(payment);
+
+    if (outcome === 'paid') {
+      const result = await this.publishPaidFeePayment(payment);
+      return {
+        state: result.success ? 'published' : 'paid',
+        message: result.message,
+      };
+    }
+    if (outcome === 'dead') {
+      return {
+        state: 'expired',
+        message:
+          'The checkout is no longer valid — you can start a new payment now',
+      };
+    }
+    if (outcome === 'unknown') {
+      return {
+        state: 'unknown',
+        redirectUrl: payment.redirectUrl ?? null,
+        message: 'Could not reach BOG — please try again in a moment',
+      };
+    }
+
+    const expiresAtMs = payment.expiresAt
+      ? payment.expiresAt.getTime()
+      : new Date((payment as any).createdAt).getTime() + PENDING_PAYMENT_TTL_MS;
+    return {
+      state: 'resumable',
+      redirectUrl: payment.redirectUrl ?? null,
+      secondsLeft: Math.max(0, Math.ceil((expiresAtMs - Date.now()) / 1000)),
+      message: 'Your checkout is still open — you can continue paying',
     };
   }
 
@@ -1119,15 +1323,26 @@ export class EtsyListingService {
   }
 
   /**
-   * Stores BOG's order id once the order exists (for later reconciliation).
+   * Stores BOG's order id, hosted checkout URL and expiry once the order
+   * exists — needed both for later reconciliation and to let the seller
+   * reopen the same checkout.
    */
   async attachBogOrderId(
     externalOrderId: string,
     bogOrderId: string,
+    redirectUrl?: string,
   ): Promise<void> {
     await this.etsyFeePaymentModel.updateOne(
       { externalOrderId },
-      { $set: { bogOrderId } },
+      {
+        $set: {
+          bogOrderId,
+          ...(redirectUrl ? { redirectUrl } : {}),
+          expiresAt: new Date(
+            Date.now() + BOG_CHECKOUT_TTL_MINUTES * 60 * 1000,
+          ),
+        },
+      },
     );
   }
 
@@ -1162,13 +1377,23 @@ export class EtsyListingService {
       return { success: true, message: 'Already published' };
     }
     // 'paid' is retryable: a crash/timeout between 'paid' and 'published'
-    // must not strand the payment — BOG callback retries land here again
-    if (payment.status !== 'pending' && payment.status !== 'paid') {
+    // must not strand the payment — BOG callback retries land here again.
+    // 'expired'/'failed' must ALSO be honoured: those are our own local locks,
+    // and BOG has just told us the money was actually captured. Refusing here
+    // would take the fee and never publish.
+    const CAPTURED_OK = ['pending', 'paid', 'expired', 'failed'];
+    if (!CAPTURED_OK.includes(payment.status)) {
       return { success: true, message: `Already processed (${payment.status})` };
     }
 
-    if (payment.status === 'pending') {
+    if (payment.status !== 'paid') {
+      if (payment.status !== 'pending') {
+        this.logger.warn(
+          `Etsy fee payment ${payment.externalOrderId} was '${payment.status}' locally but BOG reports it paid — honouring the capture`,
+        );
+      }
       payment.status = 'paid';
+      payment.error = undefined;
       await payment.save();
     }
 

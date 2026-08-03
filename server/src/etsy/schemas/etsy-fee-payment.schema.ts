@@ -17,6 +17,17 @@ export class EtsyFeePayment {
   @Prop()
   bogOrderId?: string;
 
+  // BOG's hosted checkout URL. Persisted so a seller who closed the tab or
+  // took too long can be sent back to the SAME checkout instead of waiting
+  // for the lock to lapse. Valid until expiresAt (BOG's order ttl).
+  @Prop()
+  redirectUrl?: string;
+
+  // When BOG stops accepting payment for this order — derived from the ttl
+  // we send on order creation, so our lock and BOG's checkout expire together
+  @Prop()
+  expiresAt?: Date;
+
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Product',

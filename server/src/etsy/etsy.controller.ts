@@ -296,6 +296,26 @@ export class EtsyController {
     return this.etsyListingService.retryFeePayment(paymentId, user);
   }
 
+  /**
+   * მიმდინარე ბარათის გადახდის რეალური სტატუსი BOG-იდან.
+   * აბრუნებს იმავე checkout-ის ბმულს თუ ჯერ კიდევ ვალიდურია, ან ხსნის
+   * ბლოკს თუ BOG-მა უარი თქვა / ვადა გაუვიდა — ტაიმერის ლოდინის გარეშე.
+   */
+  @Post('products/:productId/fee-payment/sync')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'Resolve the open Etsy fee checkout against BOG (resume/release)',
+  })
+  async syncFeePayment(
+    @Param('productId') productId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.etsyListingService.syncCardFeePayment(productId, {
+      _id: user._id,
+      role: user.role,
+    });
+  }
+
   private renderResultPage(success: boolean, detail: string): string {
     return `
       <html>
